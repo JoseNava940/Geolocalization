@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "370358831621",
+    "firebase_url": "https://bbvageolocalizacion.firebaseio.com",
+    "project_id": "bbvageolocalizacion",
+    "storage_bucket": "bbvageolocalizacion.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:370358831621:android:d7acbd9952a350b4996a6c",
+        "android_client_info": {
+          "package_name": "com.example.geolocalization"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "370358831621-6b36svr719rkgm09oq1vr99akl75c16l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.geolocalization",
+            "certificate_hash": "51b56fe5b3edd8610ba4f67d9193167b6e558e11"
+          }
+        },
+        {
+          "client_id": "370358831621-59ivqh4j72mp4tio8cmcfp76s45bkmi1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC77HyGE5mAZwsQs1eASbECC91iYQHdXks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "370358831621-59ivqh4j72mp4tio8cmcfp76s45bkmi1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
