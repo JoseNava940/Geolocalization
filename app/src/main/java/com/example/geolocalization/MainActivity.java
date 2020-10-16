@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText email1;
     private EditText password1;
     private Button boton;
+    private Button toMapsBtn;
 
     FirebaseAuth mAuth;
     FirebaseFirestore mFirestore;
@@ -45,12 +47,21 @@ public class MainActivity extends AppCompatActivity {
         email1 = findViewById(R.id.email);
         password1 = findViewById(R.id.password);
         boton = findViewById(R.id.registro);
+        toMapsBtn = findViewById(R.id.chngAct);
 
         boton.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
                 registroUsuario();
+            }
+        });
+        toMapsBtn.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), MapsActivity.class);
+                startActivity(intent);
             }
         });
     }
