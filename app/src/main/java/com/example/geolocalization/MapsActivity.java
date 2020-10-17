@@ -1,5 +1,6 @@
 package com.example.geolocalization;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -7,6 +8,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -21,6 +24,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener {
 
@@ -29,6 +39,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Button bterreno;
     Button bhibrido;
     Button binterior;
+    private DatabaseReference mDatabase;
+    private ArrayList<Marker> tmpReal = new ArrayList<>();
+    private ArrayList<Marker> realTime = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +62,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        setUpMapIfNeeded();
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        countDownTimer();
+    }
+
+    private void countDownTimer(){
+        new CountDownTimer(15000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                Log.e("seconds remaining", "" + millisUntilFinished / 1000);
+            }
+
+            @Override
+            public void onFinish() {
+                onMapReady(mMap);
+            }
+        }.start();
     }
 
     /**
@@ -65,59 +95,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+        mDatabase.child("usuarios").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onMapLongClick(LatLng latLng) {
-                mMap.addMarker(new MarkerOptions()
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.common_full_open_on_phone))
-                        .anchor(0.0f, 1.0f)
-                        .position(latLng));
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (Marker marker:realTime){
+                    marker.remove();
+                }
+
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    MapsTake mt = snapshot.getValue(MapsTake.class);
+                    Double latitud = mt.getLatitud();
+                    Double longitud = mt.getLongitud();
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(new LatLng(latitud,longitud));
+
+                    tmpReal.add(mMap.addMarker(markerOptions));
+                }
+
+                realTime.clear();
+                realTime.addAll(tmpReal);
+                countDownTimer();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                Toast.makeText(getApplicationContext(), "Has pulsado una marca", Toast.LENGTH_LONG).show();
-                return false;
-            }
-        });
-    }
-
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map);
-            mapFragment.getMapAsync(this);
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            mMap.setMyLocationEnabled(true);
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-                    @Override
-                    public void onMyLocationChange(Location arg0) {
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getLatitude(), arg0.getLongitude())).title("It's Me!"));
-                    }
-                });
-            }
-        }
     }
 
     @Override
